@@ -61,8 +61,8 @@ export interface DavizProps {
   /** Chart configuration */
   chartConfig: ChartConfig;
 
-  /** Callback to handle user queries and execute via SQL Agent */
-  onExecuteQuery: (query: string) => Promise<QueryResult>;
+  /** Callback to handle user queries and execute via SQL Agent (optional for demo) */
+  onExecuteQuery?: (query: string) => Promise<QueryResult>;
 
   /** Chart height in pixels */
   height?: number;
