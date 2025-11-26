@@ -40,7 +40,6 @@ const Daviz = forwardRef<DavizRef, DavizProps>(
         // For demonstration, we simulate a query execution
         // In production, this would call onExecuteQuery(query)
         console.log("Executing query via SQL Agent:", query);
-
         // Simulated response data
         const simulatedData = [
           { category: "A", value: 30 },
