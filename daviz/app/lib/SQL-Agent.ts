@@ -1,12 +1,12 @@
 // app/lib/ReAct.ts
 import { createSQLAgent } from "./ReAct"
+import { HumanMessage } from "langchain"
 
-export async function runAgent() {
+export async function runAgent(UserQuery: string = "Return all the data from all the table.") {
   const agent = await createSQLAgent();  // Await the agent creation
   
-  const question = "How many users data is in the database?";
   const stream = await agent.stream(
-    { messages: [{ role: "user", content: question }] },
+    { messages: [new HumanMessage(UserQuery)] },
     { streamMode: "values" }
   );
 
@@ -15,7 +15,8 @@ export async function runAgent() {
     
     if (message) {
       const role = message.constructor.name;
-      console.log(`${role}: ${JSON.stringify(message.content, null, 2)}`);
+      // console.log(`${role}: ${JSON.stringify(message.content, null, 2)}`);
+      return JSON.stringify(message.content, null, 2);
     }
   }
 }

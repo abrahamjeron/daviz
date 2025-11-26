@@ -1,50 +1,59 @@
-// app/lib/agent.ts
+// app/lib/createSQLAgent.ts  (or wherever you keep createSQLAgent)
+import { createAgent, createMiddleware, ToolMessage } from "langchain";
 import { SystemMessage } from "langchain";
-import { getSchema } from "./tools/getSchema"
-import { createAgent } from "langchain";
-import { executeSql } from "./tools/executeSQL"
-import { model } from "./agent"
+import { getSchema } from "./tools/getSchema";
+import { executeSql } from "./tools/executeSQL";
+import { model } from "./agent";
+
+const handleSQLErrors = createMiddleware({
+  name: "HandleSQLErrors",
+  wrapToolCall: async (request, handler) => {
+    try {
+      return await handler(request);
+    } catch (error) {
+      if (request.toolCall.name === "execute_sql") {
+        return new ToolMessage({
+          content: `SQL Error: ${error}. 
+          
+Before retrying, call getSchema to verify table names and columns.`,
+          tool_call_id: request.toolCall.id!,
+        });
+      }
+      throw error;
+    }
+  },
+});
 
 export async function createSQLAgent() {
-  const systemPrompt = new SystemMessage(`You are a careful SQLite analyst.
-
-Authoritative schema (do not invent tables or columns):
-{{SCHEMA}}
+const systemPrompt = new SystemMessage(`You are a careful SQLite analyst.
 
 General Rules:
 1. Think step-by-step.
-2. When you need data, call the tool execute_sql with exactly ONE valid SELECT query.
-3. You MUST use only read-only queries: SELECT only. No INSERT, UPDATE, DELETE, ALTER, DROP, CREATE, REPLACE, TRUNCATE.
-4. Always prefer explicit column lists (avoid SELECT *).
-5. Limit results to 5 rows unless the user explicitly requests otherwise.
-6. If the tool responds with an error, rewrite and retry the SQL (maximum 5 attempts).  
-7. If still unsuccessful after 5 attempts, respond with a JSON error object.
+2. When unsure about tables or columns, call getSchema first.
+3. Call execute_sql with exactly ONE valid SELECT query.
+4. Use only read-only queries: SELECT only. No INSERT, UPDATE, DELETE, ALTER, DROP, CREATE, REPLACE, TRUNCATE.
+5. Prefer explicit column lists instead of SELECT *.
+6. If a query fails, call getSchema, rewrite, and retry (maximum 5 attempts).
+7. If still unsuccessful after 5 attempts, produce a JSON error object.
 
 FINAL ANSWER FORMAT RULES (CRITICAL):
-- The **final** message you produce (after all reasoning and tool calls) must be **valid JSON only**.  
-- Do NOT include explanations, natural language, markdown, or additional text outside the JSON.  
-- Only output a single JSON object with named fields.
-- When returning SQL results, wrap them inside a JSON object, e.g.:
+- The final message must be valid JSON only.
+- The final message contains no explanations, natural language, or markdown of any kind.
+- The final message excludes markdown code fences, backticks, annotations, or surrounding text.
+- The response consists of a single JSON object with named fields.
+- SQL results are returned inside a JSON object, for example:
+    { "result": [ { "column1": "value", "column2": 123 } ] }
+- Errors follow this structure:
+    { "error": "description of what went wrong" }
 
-{
-  "result": [
-    { "column1": "value", "column2": 123 }
-  ]
-}
-
-- For errors, output:
-
-{
-  "error": "description of what went wrong"
-}
-
-You MUST strictly follow the JSON-only final output requirement.
-
+The final reply is always raw JSON with no extra characters before or after it.
 `);
- 
+
+
   return createAgent({
     model: model,
-    tools: [executeSql],
+    tools: [executeSql, getSchema],
     systemPrompt: systemPrompt,
+    middleware: [handleSQLErrors],
   });
 }
