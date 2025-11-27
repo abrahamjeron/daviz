@@ -49,32 +49,34 @@ export interface TransformedChartData {
 // ============ Daviz Component Props ============
 
 export interface DavizProps {
-  /** Database connection URI for LangChain SQL Agent */
+  /** Database connection URI or file path for LangChain SQL Agent
+   * Examples:
+   * - PostgreSQL: postgresql://user:password@localhost:5432/dbname
+   * - SQLite: sqlite:///path/to/database.db
+   * - MySQL: mysql+pymysql://user:password@localhost:3306/dbname
+   */
   dbUri: DatabaseURI;
 
-  /** LLM model name (e.g., "gemini-2.5-flash", "gpt-4") */
+  /** LLM model name (e.g., "gemini-2.5-flash", "gpt-4", "claude-3-sonnet") */
   model: string;
 
   /** API key for the LLM service */
   apiKey: string;
 
-  /** Chart configuration */
-  chartConfig: ChartConfig;
+  /** Chart height in pixels (default: 300) */
+  height?: number;
+
+  /** Optional className for styling */
+  className?: string;
 
   /** Callback to handle user queries and execute via SQL Agent (optional for demo) */
   onExecuteQuery?: (query: string) => Promise<QueryResult>;
-
-  /** Chart height in pixels */
-  height?: number;
 
   /** Custom error handler */
   onError?: (error: Error) => void;
 
   /** Callback when data is loaded */
   onDataLoaded?: (data: any[]) => void;
-
-  /** Optional className for styling */
-  className?: string;
 }
 
 // ============ Query Execution Result ============

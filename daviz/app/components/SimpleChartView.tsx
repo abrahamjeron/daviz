@@ -15,10 +15,21 @@ export default function SimpleChartView({ chartType, data, height = 300 }: Props
 
   switch (chartType) {
     case "bar":
-      return <BarChart xAxis={[{ data: data.xAxis }]} series={data.series} height={height} />;
+      return <BarChart xAxis={[{ data: data.xAxis, scaleType: "band" }]} series={data.series} height={height} />;
 
     case "line":
-      return <LineChart xAxis={[{ data: data.xAxis }]} series={data.series} height={height} />;
+      return (
+        <LineChart
+          xAxis={[{ data: data.xAxis, scaleType: "point" }]}
+          series={data.series.map((s: any) => ({
+            ...s,
+            type: "line",
+            curve: "natural",
+          }))}
+          height={height}
+          margin={{ top: 10, right: 10, bottom: 30, left: 60 }}
+        />
+      );
 
     case "pie":
       return <PieChart series={[{ data: data.pieData }]} height={height} />;

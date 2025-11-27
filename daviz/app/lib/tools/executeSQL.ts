@@ -3,11 +3,22 @@ import * as z from "zod";
 import { sanitizeSqlQuery } from "../safe_SQL";
 import { getDb } from "./getDB"
 
+// Store dbUri for this tool context
+let currentDbUri: string = "";
+
+export function setExecuteSqlDbUri(dbUri: string) {
+  currentDbUri = dbUri;
+}
+
 export const executeSql = tool(
   async ({ query }) => {
+    if (!currentDbUri) {
+      throw new Error("Database URI not set. Please initialize the SQL executor with setExecuteSqlDbUri()");
+    }
+    
     const q = sanitizeSqlQuery(query);
     try {
-      const database = await getDb();  
+      const database = await getDb(currentDbUri);  
       const result = await database.run(q);  
       return typeof result === "string" ? result : JSON.stringify(result, null, 2);
     } catch (e) {
