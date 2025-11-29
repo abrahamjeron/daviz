@@ -21,6 +21,18 @@
  */
 export type DatabaseURI = string;
 
+// ============ Chat Message Interface ============
+
+export interface ChatMessage {
+  id: string;
+  role: 'user' | 'assistant';
+  content: string;
+  timestamp: Date;
+  chartData?: any;
+  chartConfig?: any;
+  error?: string;
+}
+
 // ============ Chart Configuration ============
 
 export type ChartType = "line" | "bar" | "pie" | "area";
@@ -77,6 +89,30 @@ export interface DavizProps {
 
   /** Callback when data is loaded */
   onDataLoaded?: (data: any[]) => void;
+
+  /** Callback when a message is sent */
+  onMessageSent?: (message: ChatMessage) => void;
+
+  /** Callback when a message is received */
+  onMessageReceived?: (message: ChatMessage) => void;
+}
+
+// ============ Conversation Panel Props ============
+
+export interface ConversationPanelProps {
+  messages: ChatMessage[];
+  onSendMessage: (query: string) => void;
+  loading: boolean;
+  className?: string;
+}
+
+// ============ Chart Display Panel Props ============
+
+export interface ChartDisplayPanelProps {
+  chartData: any;
+  chartConfig: any;
+  height: number;
+  className?: string;
 }
 
 // ============ Query Execution Result ============

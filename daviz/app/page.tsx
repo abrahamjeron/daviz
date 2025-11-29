@@ -6,12 +6,12 @@ import Daviz, { DavizRef } from "./components/Daviz";
 export default function Page() {
   const davizRef = useRef<DavizRef>(null);
   return (
-    <div style={{ padding: 32 }}>
+    <div className="w-screen h-screen p-8 overflow-hidden bg-gradient-to-br from-gray-50 to-gray-100">
       <Daviz
         ref={davizRef}
-        dbUri="postgresql://abra:yourpassword@localhost:5432/local_fyule_db_current?schema=public"
-        model="gemini-2.5-flash"
-        apiKey={"AIzaSyAzko2czBZ9Qy8hPikm7p2qIBlYDmFQeKo"}
+        dbUri=""
+        model=""
+        apiKey={""}
         height={500}
       />
     </div>
