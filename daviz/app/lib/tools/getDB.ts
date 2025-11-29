@@ -12,7 +12,7 @@ export async function getDb(dbUri: string) {
   try {
     // Parse the dbUri to determine database type and create appropriate DataSource
     let datasource: DataSource;
-    
+    console.log("Connecting to database with URI:", dbUri);
     if (dbUri.startsWith("sqlite")) {
       // Extract path from sqlite:///path/to/db.db
       const dbPath = dbUri.replace("sqlite:///", "");
@@ -27,6 +27,9 @@ export async function getDb(dbUri: string) {
         url: dbUri,
       });
     }
+    
+    // Initialize the DataSource before using it
+    await datasource.initialize();
     
     const db = await SqlDatabase.fromDataSourceParams({ appDataSource: datasource });
     dbCache.set(dbUri, db);
